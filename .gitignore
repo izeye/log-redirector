@@ -1,0 +1,5 @@
+# Created by .gitignore support plugin (hsz.mobi)
+.idea
+log-redirector.iml
+
+src/main/resources/application-production.properties
