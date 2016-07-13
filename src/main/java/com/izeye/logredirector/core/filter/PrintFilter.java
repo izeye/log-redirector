@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Order(2)
-@Profile("print")
+@Profile("print-filter")
 @Slf4j
 public class PrintFilter extends Filter {
 
