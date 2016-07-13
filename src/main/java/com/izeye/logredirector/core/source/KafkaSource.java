@@ -28,6 +28,7 @@ public class KafkaSource extends Source {
 	private KafkaSourceProperties properties;
 
 	private final AtomicLong counter = new AtomicLong(0);
+	private final AtomicLong failureCounter = new AtomicLong(0);
 
 	@Override
 	public void run() {
@@ -39,11 +40,18 @@ public class KafkaSource extends Source {
 			if (records.isEmpty()) {
 				continue;
 			}
+			this.counter.addAndGet(records.count());
+			
 			for (ConsumerRecord<String, String> record : records) {
 				String value = record.value();
-				passToNext(value);
+				try {
+					passToNext(value);
+				}
+				catch (Throwable ex) {
+					this.failureCounter.incrementAndGet();
+					log.error("Unexpected error.", ex);
+				}
 			}
-			counter.addAndGet(records.count());
 		}
 	}
 
@@ -62,7 +70,8 @@ public class KafkaSource extends Source {
 	@Scheduled(cron = "* * * * * ?")
 	public void printStatistics() {
 		long count = this.counter.getAndSet(0);
-		log.info("# of consumed logs per second in source: " + count);
+		log.info("# of consumed logs per second in source: {}", count);
+		log.info("# of failures: {}", this.failureCounter.get());
 	}
 	
 }

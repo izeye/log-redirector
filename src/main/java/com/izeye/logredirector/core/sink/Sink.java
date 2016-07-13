@@ -26,7 +26,7 @@ public abstract class Sink extends AbstractComponent {
 	@Scheduled(cron = "* * * * * ?")
 	public void printStatistics() {
 		long count = this.counter.getAndSet(0);
-		log.info("# of consumed logs per second in sink: " + count);
+		log.info("# of consumed logs per second in sink: {}", count);
 	}
 	
 }

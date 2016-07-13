@@ -45,7 +45,9 @@ public class RegexTransformFilter extends Filter {
 	protected Object doProcess(Object value) {
 		Map<String, Object> map = new HashMap<>();
 		Matcher matcher = this.pattern.matcher((String) value);
-		matcher.find();
+		if (!matcher.find()) {
+			throw new IllegalArgumentException("Unexpected value: " + value);
+		}
 		for (String fieldName : this.fieldNames) {
 			String fieldValue = matcher.group(fieldName);
 			map.put(fieldName, fieldValue);
