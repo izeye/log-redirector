@@ -17,4 +17,6 @@ public class ElasticsearchSinkProperties {
 	private String indexNameSuffixDateFormat;
 	private String typeName;
 	
+	private int batchSize;
+	
 }

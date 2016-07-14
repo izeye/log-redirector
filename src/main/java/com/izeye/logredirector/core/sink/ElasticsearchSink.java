@@ -2,7 +2,8 @@ package com.izeye.logredirector.core.sink;
 
 import static com.izeye.logredirector.core.domain.FieldConstants.TIMESTAMP;
 
-import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
@@ -27,7 +28,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 @EnableConfigurationProperties(ElasticsearchSinkProperties.class)
 @Profile("elasticsearch-sink")
-@Slf4j
 public class ElasticsearchSink extends Sink {
 
 	private static final String CLUSTER_NAME = "cluster.name";
@@ -40,6 +40,8 @@ public class ElasticsearchSink extends Sink {
 	private TransportClient client;
 	
 	private ThreadLocal<SimpleDateFormat> indexNameSuffixDateFormat;
+	
+	private BulkRequestBuilder bulkRequestBuilder;
 	
 	@PostConstruct
 	public void init() {
@@ -64,6 +66,8 @@ public class ElasticsearchSink extends Sink {
 			}
 		}
 		this.client = client;
+
+		this.bulkRequestBuilder = this.client.prepareBulk();
 	}
 
 	private void initIndexNameSuffixDateFormat() {
@@ -88,8 +92,14 @@ public class ElasticsearchSink extends Sink {
 		Map<String, Object> map = (Map<String, Object>) value;
 		Date timestamp = (Date) map.get(TIMESTAMP);
 		String indexName = getIndexName(timestamp);
-		this.client.prepareIndex(indexName, this.properties.getTypeName())
-				.setSource(map).get();
+		IndexRequestBuilder indexRequestBuilder =
+				this.client.prepareIndex(indexName, this.properties.getTypeName())
+						.setSource(map);
+		this.bulkRequestBuilder.add(indexRequestBuilder);
+		if (this.bulkRequestBuilder.numberOfActions() == this.properties.getBatchSize()) {
+			this.bulkRequestBuilder.get();
+			this.bulkRequestBuilder = this.client.prepareBulk();
+		}
 	}
 
 	private String getIndexName(Date timestamp) {
