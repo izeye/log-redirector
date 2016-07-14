@@ -20,7 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by izeye on 16. 7. 12..
@@ -43,11 +44,17 @@ public class ElasticsearchSink extends Sink {
 	
 	private BulkRequestBuilder bulkRequestBuilder;
 	
+	private ExecutorService executorService;
+	
 	@PostConstruct
 	public void init() {
 		initClient();
 
+		this.bulkRequestBuilder = this.client.prepareBulk();
+
 		initIndexNameSuffixDateFormat();
+
+		this.executorService = Executors.newFixedThreadPool(this.properties.getThreadPoolSize());
 	}
 
 	private void initClient() {
@@ -66,8 +73,6 @@ public class ElasticsearchSink extends Sink {
 			}
 		}
 		this.client = client;
-
-		this.bulkRequestBuilder = this.client.prepareBulk();
 	}
 
 	private void initIndexNameSuffixDateFormat() {
@@ -97,7 +102,7 @@ public class ElasticsearchSink extends Sink {
 						.setSource(map);
 		this.bulkRequestBuilder.add(indexRequestBuilder);
 		if (this.bulkRequestBuilder.numberOfActions() == this.properties.getBatchSize()) {
-			this.bulkRequestBuilder.get();
+			this.executorService.submit(new Worker(this.bulkRequestBuilder));
 			this.bulkRequestBuilder = this.client.prepareBulk();
 		}
 	}
@@ -108,6 +113,21 @@ public class ElasticsearchSink extends Sink {
 		}
 		return this.properties.getIndexName() + "-" +
 				this.indexNameSuffixDateFormat.get().format(timestamp);
+	}
+	
+	private static class Worker implements Runnable {
+		
+		private final BulkRequestBuilder bulkRequestBuilder;
+		
+		public Worker(BulkRequestBuilder bulkRequestBuilder) {
+			this.bulkRequestBuilder = bulkRequestBuilder;
+		}
+
+		@Override
+		public void run() {
+			this.bulkRequestBuilder.get();
+		}
+		
 	}
 	
 }

@@ -18,5 +18,6 @@ public class ElasticsearchSinkProperties {
 	private String typeName;
 	
 	private int batchSize;
+	private int threadPoolSize;
 	
 }
