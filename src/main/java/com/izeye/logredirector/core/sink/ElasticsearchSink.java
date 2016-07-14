@@ -128,9 +128,9 @@ public class ElasticsearchSink extends Sink {
 		@Override
 		public void run() {
 			int count = this.bulkRequestBuilder.numberOfActions();
-			log.debug("{} bulk requests will be sent.");
+			log.debug("{} bulk requests will be sent.", count);
 			this.bulkRequestBuilder.get();
-			log.debug("{} bulk requests have been sent.");
+			log.debug("{} bulk requests have been sent.", count);
 			markProcessed(count);
 		}
 		
