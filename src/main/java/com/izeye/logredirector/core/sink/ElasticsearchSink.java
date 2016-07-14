@@ -2,6 +2,7 @@ package com.izeye.logredirector.core.sink;
 
 import static com.izeye.logredirector.core.domain.FieldConstants.TIMESTAMP;
 
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.transport.TransportClient;
@@ -29,6 +30,7 @@ import java.util.concurrent.Executors;
 @Service
 @EnableConfigurationProperties(ElasticsearchSinkProperties.class)
 @Profile("elasticsearch-sink")
+@Slf4j
 public class ElasticsearchSink extends Sink {
 
 	private static final String CLUSTER_NAME = "cluster.name";
@@ -114,8 +116,8 @@ public class ElasticsearchSink extends Sink {
 		return this.properties.getIndexName() + "-" +
 				this.indexNameSuffixDateFormat.get().format(timestamp);
 	}
-	
-	private static class Worker implements Runnable {
+
+	private class Worker implements Runnable {
 		
 		private final BulkRequestBuilder bulkRequestBuilder;
 		
@@ -125,7 +127,11 @@ public class ElasticsearchSink extends Sink {
 
 		@Override
 		public void run() {
+			int count = this.bulkRequestBuilder.numberOfActions();
+			log.debug("{} bulk requests will be sent.");
 			this.bulkRequestBuilder.get();
+			log.debug("{} bulk requests have been sent.");
+			markProcessed(count);
 		}
 		
 	}

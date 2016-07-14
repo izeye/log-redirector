@@ -17,11 +17,13 @@ public abstract class Sink extends AbstractComponent {
 	@Override
 	public void process(Object value) {
 		doProcess(value);
-		
-		this.counter.incrementAndGet();
 	}
 	
 	protected abstract void doProcess(Object value);
+	
+	protected void markProcessed(int count) {
+		this.counter.addAndGet(count);
+	}
 
 	@Scheduled(cron = "* * * * * ?")
 	public void printStatistics() {

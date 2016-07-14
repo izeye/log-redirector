@@ -12,6 +12,7 @@ public class NoopSink extends Sink {
 
 	@Override
 	protected void doProcess(Object value) {
+		markProcessed(1);
 	}
 
 }

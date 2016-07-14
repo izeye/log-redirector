@@ -15,6 +15,7 @@ public class PrintSink extends Sink {
 	@Override
 	protected void doProcess(Object value) {
 		log.info("value: " + value);
+		markProcessed(1);
 	}
 
 }
