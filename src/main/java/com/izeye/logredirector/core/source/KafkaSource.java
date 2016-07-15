@@ -1,5 +1,6 @@
 package com.izeye.logredirector.core.source;
 
+import com.izeye.logredirector.core.service.StatisticsService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -8,13 +9,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by izeye on 16. 7. 12..
@@ -26,9 +25,9 @@ public class KafkaSource extends Source {
 	
 	@Autowired
 	private KafkaSourceProperties properties;
-
-	private final AtomicLong counter = new AtomicLong(0);
-	private final AtomicLong failureCounter = new AtomicLong(0);
+	
+	@Autowired
+	private StatisticsService statisticsService;
 
 	@Override
 	public void run() {
@@ -41,7 +40,7 @@ public class KafkaSource extends Source {
 				continue;
 			}
 			int readCount = records.count();
-			this.counter.addAndGet(readCount);
+			this.statisticsService.markSourceProcessed(readCount);
 			log.debug("Read {} records from Kafka.", readCount);
 			
 			for (ConsumerRecord<String, String> record : records) {
@@ -52,7 +51,7 @@ public class KafkaSource extends Source {
 					passToNext(value);
 				}
 				catch (Throwable ex) {
-					this.failureCounter.incrementAndGet();
+					this.statisticsService.markFailure();
 					log.error("Unexpected error.", ex);
 				}
 			}
@@ -69,13 +68,6 @@ public class KafkaSource extends Source {
 		properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
 				this.properties.getValueDeserializer());
 		return properties;
-	}
-
-	@Scheduled(cron = "* * * * * ?")
-	public void printStatistics() {
-		long count = this.counter.getAndSet(0);
-		log.info("# of consumed logs per second in source: {}", count);
-		log.info("# of failures: {}", this.failureCounter.get());
 	}
 	
 }
