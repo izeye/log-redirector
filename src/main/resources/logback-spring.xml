@@ -62,10 +62,22 @@
         </filter>
     </appender>
 
-    <root level="INFO">
+    <appender name="DEBUG_LOG_ASYNC_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="DEBUG_LOG_APPENDER" />
+    </appender>
+
+    <appender name="WARN_LOG_ASYNC_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="WARN_LOG_APPENDER" />
+    </appender>
+
+    <appender name="ERROR_LOG_ASYNC_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="ERROR_LOG_APPENDER" />
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="DEBUG_LOG_ASYNC_APPENDER" />
+        <appender-ref ref="WARN_LOG_ASYNC_APPENDER" />
+        <appender-ref ref="ERROR_LOG_ASYNC_APPENDER" />
         
         <springProfile name="local">
             <appender-ref ref="CONSOLE" />
