@@ -42,7 +42,7 @@ public class KafkaSource extends Source {
 			}
 			int readCount = records.count();
 			this.counter.addAndGet(readCount);
-			log.info("Read {} records from Kafka.", readCount);
+			log.debug("Read {} records from Kafka.", readCount);
 			
 			for (ConsumerRecord<String, String> record : records) {
 				log.debug("{}/{}/{}", record.topic(), record.partition(), record.offset());
