@@ -4,6 +4,7 @@ import static com.izeye.logredirector.core.domain.FieldConstants.TIMESTAMP;
 import static com.izeye.logredirector.core.domain.FieldConstants.TIMESTAMP_IN_MILLIS;
 import static com.izeye.logredirector.core.domain.FieldConstants.TIMESTAMP_IN_SECONDS;
 
+import com.izeye.logredirector.core.service.StatisticsService;
 import com.izeye.logredirector.core.util.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class RegexTransformFilter extends Filter {
 	
 	@Autowired
 	private RegexTransformFilterProperties properties;
+	
+	@Autowired
+	private StatisticsService statisticsService;
 	
 	private List<String> fieldNames;
 	private Pattern pattern;
@@ -66,8 +70,14 @@ public class RegexTransformFilter extends Filter {
 
 		@Override
 		public void run() {
-			Map<String, Object> transformed = transform(value);
-			passToNext(transformed);
+			try {
+				Map<String, Object> transformed = transform(value);
+				passToNext(transformed);
+			}
+			catch (Throwable ex) {
+				statisticsService.markFailure();
+				log.error("Unexpected exception.", ex);
+			}
 		}
 
 	}

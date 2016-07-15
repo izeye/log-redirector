@@ -46,14 +46,7 @@ public class KafkaSource extends Source {
 			for (ConsumerRecord<String, String> record : records) {
 				log.debug("{}/{}/{}", record.topic(), record.partition(), record.offset());
 				
-				String value = record.value();
-				try {
-					passToNext(value);
-				}
-				catch (Throwable ex) {
-					this.statisticsService.markFailure();
-					log.error("Unexpected error.", ex);
-				}
+				passToNext(record.value());
 			}
 		}
 	}
