@@ -40,9 +40,13 @@ public class KafkaSource extends Source {
 			if (records.isEmpty()) {
 				continue;
 			}
-			this.counter.addAndGet(records.count());
+			int readCount = records.count();
+			this.counter.addAndGet(readCount);
+			log.info("Read {} records from Kafka.", readCount);
 			
 			for (ConsumerRecord<String, String> record : records) {
+				log.debug("{}/{}/{}", record.topic(), record.partition(), record.offset());
+				
 				String value = record.value();
 				try {
 					passToNext(value);

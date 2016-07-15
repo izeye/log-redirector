@@ -1,5 +1,19 @@
 # Created by .gitignore support plugin (hsz.mobi)
-.idea
+build/
+
+logs/
+application.out
+application.pid
+event.log
+gc.log
+
+.idea/
 log-redirector.iml
+
+.gradle/
+.settings/
+bin/
+.classpath
+.project
 
 src/main/resources/application-production.properties

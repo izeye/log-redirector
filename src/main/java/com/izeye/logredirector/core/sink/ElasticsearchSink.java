@@ -96,6 +96,7 @@ public class ElasticsearchSink extends Sink {
 
 	@Override
 	protected void doProcess(Object value) {
+		@SuppressWarnings("unchecked")
 		Map<String, Object> map = (Map<String, Object>) value;
 		Date timestamp = (Date) map.get(TIMESTAMP);
 		String indexName = getIndexName(timestamp);

@@ -22,8 +22,6 @@ apply plugin: 'propdeps'
 
 sourceCompatibility = 1.8
 
-version = '1.0'
-
 repositories {
     jcenter()
     maven { url "http://repo.spring.io/libs-release" }
@@ -34,6 +32,8 @@ repositories {
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    
     compile("org.apache.kafka:kafka-clients:${kafkaClientVersion}")
     compile("org.elasticsearch:elasticsearch:${elasticsearchVersion}")
 
@@ -42,6 +42,14 @@ dependencies {
     testCompile("org.springframework.boot:spring-boot-starter-test")
 }
 
+springBoot {
+    executable = true
+}
+
 task wrapper(type: Wrapper) {
     gradleVersion = '2.14'
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:unchecked'
 }
