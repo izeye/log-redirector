@@ -35,8 +35,8 @@ public class DefaultStatisticsService implements StatisticsService {
 	@Scheduled(cron = "* * * * * ?")
 	public void printStatistics() {
 		long sourceCount = this.sourceCounter.getAndSet(0);
-		long sinkCount = this.sourceCounter.getAndSet(0);
-		long failureCount = this.sourceCounter.getAndSet(0);
+		long sinkCount = this.sinkCounter.getAndSet(0);
+		long failureCount = this.failureCounter.getAndSet(0);
 		
 		log.info("# of consumed logs per second in source: {}", sourceCount);
 		log.info("# of consumed logs per second in sink: {}", sinkCount);
