@@ -6,7 +6,8 @@ import static com.izeye.logredirector.core.domain.FieldConstants.TIMESTAMP_IN_SE
 
 import com.izeye.logredirector.core.util.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
@@ -23,28 +24,51 @@ import java.util.regex.Pattern;
  * Created by izeye on 16. 7. 12..
  */
 @Service
+@EnableConfigurationProperties(RegexTransformFilterProperties.class)
 @Order(1)
 @Slf4j
 public class RegexTransformFilter extends Filter {
 	
-	@Value("${log-redirector.filters.regex-transform-filter.regex}")
-	private String regex;
+	@Autowired
+	private RegexTransformFilterProperties properties;
 	
 	private List<String> fieldNames;
 	private Pattern pattern;
 	
 	@PostConstruct
 	public void init() {
-		this.fieldNames = RegexUtils.getGroupNames(this.regex);
+		String regex = this.properties.getRegex();
+		
+		this.fieldNames = RegexUtils.getGroupNames(regex);
 		log.info("Field names: {}", fieldNames);
 		
-		this.pattern = Pattern.compile(this.regex);
+		this.pattern = Pattern.compile(regex);
 	}
-	
+
 	@Override
-	protected Object doProcess(Object value) {
+	public void process(Object value) {
+		transform((String) value);
+	}
+
+	private class Worker implements Runnable {
+		
+		private String value;
+		
+		public Worker(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public void run() {
+			Map<String, Object> transformed = transform(value);
+			passToNext(transformed);
+		}
+
+	}
+
+	private Map<String, Object> transform(String value) {
 		Map<String, Object> map = new HashMap<>();
-		Matcher matcher = this.pattern.matcher((String) value);
+		Matcher matcher = this.pattern.matcher(value);
 		if (!matcher.find()) {
 			throw new IllegalArgumentException("Unexpected value: " + value);
 		}

@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service;
 @Profile("print-filter")
 @Slf4j
 public class PrintFilter extends Filter {
-
+	
 	@Override
-	protected Object doProcess(Object value) {
+	public void process(Object value) {
 		log.info("value: " + value);
-		return value;
+		passToNext(value);
 	}
 
 }
