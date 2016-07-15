@@ -36,7 +36,7 @@ public class DefaultStatisticsService implements StatisticsService {
 	public void printStatistics() {
 		long sourceCount = this.sourceCounter.getAndSet(0);
 		long sinkCount = this.sinkCounter.getAndSet(0);
-		long failureCount = this.failureCounter.getAndSet(0);
+		long failureCount = this.failureCounter.get();
 		
 		log.info("# of consumed logs per second in source: {}", sourceCount);
 		log.info("# of consumed logs per second in sink: {}", sinkCount);
