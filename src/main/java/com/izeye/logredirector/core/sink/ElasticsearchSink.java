@@ -103,10 +103,12 @@ public class ElasticsearchSink extends Sink {
 		IndexRequestBuilder indexRequestBuilder =
 				this.client.prepareIndex(indexName, this.properties.getTypeName())
 						.setSource(map);
-		this.bulkRequestBuilder.add(indexRequestBuilder);
-		if (this.bulkRequestBuilder.numberOfActions() == this.properties.getBatchSize()) {
-			this.executorService.submit(new Worker(this.bulkRequestBuilder));
-			this.bulkRequestBuilder = this.client.prepareBulk();
+		synchronized (this) {
+			this.bulkRequestBuilder.add(indexRequestBuilder);
+			if (this.bulkRequestBuilder.numberOfActions() == this.properties.getBatchSize()) {
+				this.executorService.submit(new Worker(this.bulkRequestBuilder));
+				this.bulkRequestBuilder = this.client.prepareBulk();
+			}
 		}
 	}
 
