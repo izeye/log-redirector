@@ -9,6 +9,7 @@
     <property name="DEBUG_LOG_FILE" value="logs/debug.log" />
     <property name="WARN_LOG_FILE" value="logs/warn.log" />
     <property name="ERROR_LOG_FILE" value="logs/error.log" />
+    <property name="FAILURE_LOG_FILE" value="logs/failure.log" />
 
     <appender name="DEBUG_LOG_APPENDER"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -54,12 +55,26 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern>${MDC_ENABLED_FILE_LOG_PATTERN}</pattern>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
             <charset>utf8</charset>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>ERROR</level>
         </filter>
+    </appender>
+
+    <appender name="FAILURE_LOG_APPENDER"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${FAILURE_LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${FAILURE_LOG_FILE}.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%msg%n</pattern>
+            <charset>utf8</charset>
+        </encoder>
     </appender>
 
     <appender name="DEBUG_LOG_ASYNC_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
@@ -73,6 +88,14 @@
     <appender name="ERROR_LOG_ASYNC_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="ERROR_LOG_APPENDER" />
     </appender>
+
+    <appender name="FAILURE_LOG_ASYNC_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FAILURE_LOG_APPENDER" />
+    </appender>
+    
+    <logger name="FAILURE" level="INFO" additivity="false">
+        <appender-ref ref="FAILURE_LOG_ASYNC_APPENDER" />
+    </logger>
 
     <root level="INFO">
         <appender-ref ref="DEBUG_LOG_ASYNC_APPENDER" />

@@ -9,6 +9,6 @@ public interface StatisticsService {
 	
 	void markSinkProcessed(int count);
 	
-	void markFailure();
+	void markFailure(Object value);
 	
 }

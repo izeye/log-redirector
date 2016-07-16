@@ -71,11 +71,11 @@ public class RegexTransformFilter extends Filter {
 		@Override
 		public void run() {
 			try {
-				Map<String, Object> transformed = transform(value);
+				Map<String, Object> transformed = transform(this.value);
 				passToNext(transformed);
 			}
 			catch (Throwable ex) {
-				statisticsService.markFailure();
+				statisticsService.markFailure(this.value);
 				log.error("Unexpected exception.", ex);
 			}
 		}

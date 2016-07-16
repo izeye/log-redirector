@@ -1,6 +1,8 @@
 package com.izeye.logredirector.core.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ public class DefaultStatisticsService implements StatisticsService {
 	private final AtomicLong sourceCounter = new AtomicLong(0);
 	private final AtomicLong sinkCounter = new AtomicLong(0);
 	private final AtomicLong failureCounter = new AtomicLong(0);
+	
+	private final Logger failureLog = LoggerFactory.getLogger("FAILURE");
 
 	@Override
 	public void markSourceProcessed(int count) {
@@ -28,7 +32,8 @@ public class DefaultStatisticsService implements StatisticsService {
 	}
 
 	@Override
-	public void markFailure() {
+	public void markFailure(Object value) {
+		failureLog.info(value.toString());
 		this.failureCounter.incrementAndGet();
 	}
 
